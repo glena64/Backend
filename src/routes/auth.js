@@ -21,6 +21,8 @@ router.post('/driver-registration',authenticateToken, AuthController.registerDri
 router.post('/vehicle-new' , AuthController.registerVehicle); // Assuming this is for vehicle registration
 // Apply auth rate limiter to token refresh
 router.post('/refresh-token', authLimiter, AuthController.refreshToken);
+router.post('/driverstatus',authenticateToken,AuthController.driverstatus);
+router.post('/vehiclestatus',AuthController.vehiclestatus);
 
 // Apply password reset limiter (if you implement password reset)
 // router.post('/forgot-password', passwordResetLimiter, AuthController.forgotPassword);

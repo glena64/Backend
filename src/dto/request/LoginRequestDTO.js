@@ -10,7 +10,7 @@ class LoginRequestDTO {
     if (!this.email) {
       errors.push('Email is required');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email)) {
-      errors.push('Invalid email format');
+      errors.push('Invalid email format'); 
     }
 
     if (!this.password) {

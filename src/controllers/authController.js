@@ -19,6 +19,27 @@ class AuthController {
       res.status(400).json(BaseResponseDTO.error(error.message));
     }
   }
+  //===============Driver Status Registration================
+  static async driverstatus(req, res) {
+    try {
+      console.log('Registering driver status with data:', req.body);
+      const result = await AuthService.driverstatus(req.body);
+      res.status(201).json(BaseResponseDTO.success(result, 'Driver status registration successful'));
+    } catch (error) {
+      res.status(400).json(BaseResponseDTO.error(error.message));
+    }
+  }
+//===========================vehicle status registration=============
+  static async vehiclestatus(req, res) {
+    try {
+      console.log('Registering vehicle status with data:', req.body);
+      const result = await AuthService.vehiclestatus(req.body);
+      res.status(201).json(BaseResponseDTO.success(result, 'Vehicle status registration successful'));
+    } catch (error) {
+      res.status(400).json(BaseResponseDTO.error(error.message));
+    }
+  }
+  //===================================================================
 
   static async registerNew(req, res) {
     try {
