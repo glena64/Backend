@@ -51,6 +51,56 @@ class AuthController {
     }
   }
 
+  //===================getbyLicense========================
+static async getByLicense(req, res) {
+  try {
+    const { license } = req.query;
+
+    if (!license) {
+      return res.status(400).json(BaseResponseDTO.error("License number is required"));
+    }
+
+    console.log('Fetching user by license:', license);
+
+    const result = await AuthService.getByLicense(license);
+
+    if (!result) {
+      return res.status(404).json(BaseResponseDTO.error("User not found"));
+    }
+
+    res.json(BaseResponseDTO.success(result, 'User fetched successfully'));
+  } catch (error) {
+    console.error("Error fetching user by license:", error);
+    res.status(500).json(BaseResponseDTO.error("Server error: " + error.message));
+  }
+}
+
+  //=======================getByMobilenumber==============================
+static async getByMobilenumber(req, res) {
+  try {
+    let mobile  = req.body.Mobilenumber;
+   console.log('11111111111111111111111111111111111111111111111111111getByMobilenumber called with mobile:', mobile);
+   
+    if (!mobile) {
+      return res.status(400).json(BaseResponseDTO.error("Mobile number is required"));
+    }
+
+    // console.log('Fetching user by mobile number:', mobile);
+
+    const result = await AuthService.getByMobilenumber(mobile);
+
+    if (!result) {
+      return res.status(404).json(BaseResponseDTO.error("User not found"));
+    }
+
+    res.json(BaseResponseDTO.success(result, 'User fetched successfully'));
+  } catch (error) {
+    console.error("Error fetching user by mobile number:", error);
+    res.status(500).json(BaseResponseDTO.error("Server error: " + error.message));
+  }
+}
+//=============================================================================
+
   //driver_tbl registration
   static async registerDriver(req,res){
     try{

@@ -12,6 +12,9 @@ const DriverRequestDTO = require('../dto/request/DriverRequestDTO');
 const DriverStatusRequestDTO = require('../dto/request/DriverStatusRequestDTO');
 const VehicleStatusRequestDTO = require('../dto/request/VehicleStatusRequestDTO');
 const VehicleStatusResponseDTO = require('../dto/response/VehicleStatusResponseDTO');
+const Driver = db.Driver;
+const DriverStatus = db.DriverStatus; 
+// Assuming you have a DriverStatus model
 class AuthService {
   static async login(loginData) {
     const loginDTO = new LoginRequestDTO(loginData);
@@ -275,6 +278,8 @@ static async driverstatus(registerData, user) {
   return createdStatus; // Or wrap with response DTO if needed
 }
 
+//===========================vehicle status registration=============
+
 
   static async vehiclestatus(data) {
     const dto = new VehicleStatusRequestDTO(data);
@@ -314,6 +319,55 @@ static async driverstatus(registerData, user) {
       throw new Error('Failed to fetch vehicle status records');
     }
   }
+
+static async getByMobilenumber(mobileNumber) {
+  console.log("Fetching driver by mobile number:", mobileNumber);
+  if (!mobileNumber) {
+    throw new Error("Mobile number is required");
+  }
+
+  const driver = await Driver.findOne({
+    include: [
+      {
+        model: DriverStatus,
+        where: { Phone_no: mobileNumber },
+        required: true
+      }
+    ]
+  });
+
+  if (!driver) {
+    throw new Error("No driver found with this mobile number");
+  }
+
+  return driver;
+}
+  
+
+
+
+ static async getByLicense(license) {
+  if (!license) {
+    throw new Error("License number is required");
+  }
+
+  const driver = await Driver.findOne({
+    where: { license_no: license },
+    include: [
+      {
+        model: DriverStatus,
+        required: false
+      }
+    ]
+  });
+
+  if (!driver) {
+    throw new Error("No driver found with this license number");
+  }
+
+  return driver;
+}
+
 }
 
 module.exports = AuthService;

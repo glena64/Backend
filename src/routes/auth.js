@@ -18,11 +18,13 @@ router.post('/register', AuthController.registerNew);
 //Apply create Driver_tbl rate limiter to registration
 router.post('/driver-registration',authenticateToken, AuthController.registerDriver);   
 //vehicle
-router.post('/vehicle-new' , AuthController.registerVehicle); // Assuming this is for vehicle registration
+router.post('/vehicle-new' ,authenticateToken, AuthController.registerVehicle); // Assuming this is for vehicle registration
 // Apply auth rate limiter to token refresh
 router.post('/refresh-token', authLimiter, AuthController.refreshToken);
 router.post('/driverstatus',authenticateToken,AuthController.driverstatus);
 router.post('/vehiclestatus',AuthController.vehiclestatus);
+router.get('/getlicense', AuthController.getByLicense);
+router.get('/getdriver', AuthController.getByMobilenumber); 
 
 // Apply password reset limiter (if you implement password reset)
 // router.post('/forgot-password', passwordResetLimiter, AuthController.forgotPassword);

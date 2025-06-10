@@ -1,5 +1,5 @@
 const JWTConfig = require('../config/jwt');
-const User = require('../models/User');
+const db = require('../models');
 const BaseResponseDTO = require('../dto/response/BaseResponseDTO');
 
 const authenticateToken = async (req, res, next) => {
@@ -16,7 +16,7 @@ const authenticateToken = async (req, res, next) => {
     const decoded = JWTConfig.verifyAccessToken(token);
     
     // Get user from database
-    const user = await User.findByPk(decoded.userId, {
+    const user = await db.User.findByPk(decoded.userId, {
       attributes: { exclude: ['password', 'refreshToken'] }
     });
 
