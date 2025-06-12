@@ -54,6 +54,13 @@ module.exports = (sequelize, DataTypes) => {
     return safeDriver;
   };
 
+   Driver.associate = models => {
+    Driver.hasMany(models.DriverStatus, {
+      foreignKey: 'd_id',
+      as: 'statuses' // optional alias
+    });
+  };
+
   // ⚠️ No Driver.associate() block — this model is independent.
 
   return Driver;

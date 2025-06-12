@@ -8,11 +8,11 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true
     },
     email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-      validate: { isEmail: true }
-    },
+  type: DataTypes.STRING,
+  allowNull: false,
+  unique: true, // this creates a unique index
+  validate: { isEmail: true }
+},
     password: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -54,6 +54,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   });
 
+  // ✅ Associations go *after* define
   User.associate = (models) => {
     User.hasOne(models.Registration, {
       foreignKey: 'user_id',
@@ -61,6 +62,7 @@ module.exports = (sequelize, DataTypes) => {
     });
   };
 
+  // ✅ Instance methods
   User.prototype.validatePassword = async function (password) {
     return bcrypt.compare(password, this.password);
   };

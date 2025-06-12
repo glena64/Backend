@@ -54,6 +54,15 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'vehicle',
     timestamps: false
   });
+  
+  // ✅ Association setup
+  Vehicle.associate = (models) => {
+  Vehicle.hasMany(models.VehicleStatus, {
+    foreignKey: 'v_id',
+    as: 'vehicleStatuses'
+  });
+};
+
 
   // ✅ Optional cleanup method for response shaping
   Vehicle.prototype.toSafeObject = function () {

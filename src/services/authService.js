@@ -1,28 +1,32 @@
-
-const db = require('../models'); // make sure index.js in /models returns db with initialized models
+const db = require('../models');
 const User = db.User;
 const Registration = db.Registration;
+const Driver = db.Driver;
+const DriverStatus = db.DriverStatus;
+const Vehicle = db.Vehicle;
+const VehicleStatus = db.VehicleStatus;
+
 const JWTConfig = require('../config/jwt');
 const LoginRequestDTO = require('../dto/request/LoginRequestDTO');
 const RegisterRequestDTO = require('../dto/request/RegisterRequestDTO');
-const AuthResponseDTO = require('../dto/response/AuthResponseDTO');
 const RegistrationDto = require('../dto/request/RegistrationDto');
 const VehicleDto = require('../dto/request/VehicleRequestDTO');
 const DriverRequestDTO = require('../dto/request/DriverRequestDTO');
 const DriverStatusRequestDTO = require('../dto/request/DriverStatusRequestDTO');
 const VehicleStatusRequestDTO = require('../dto/request/VehicleStatusRequestDTO');
+const AuthResponseDTO = require('../dto/response/AuthResponseDTO');
 const VehicleStatusResponseDTO = require('../dto/response/VehicleStatusResponseDTO');
-const Driver = db.Driver;
-const DriverStatus = db.DriverStatus; 
-// Assuming you have a DriverStatus model
+const RouteRequestDTO = require('../dto/request/RouteRequestDTO');
+const RouteResponseDTO = require('../dto/response/RouteResponseDTO');
+const { Route } = require('../models');
+// const Route = db.Route; // Assuming Route model is defined in models
+
 class AuthService {
   static async login(loginData) {
     const loginDTO = new LoginRequestDTO(loginData);
     const validation = loginDTO.validate();
-    
-    if (!validation.isValid) {
-      throw new Error(validation.errors.join(', '));
-    }
+
+   
 
     const user = await User.findOne({
       where: { email: loginDTO.email, isActive: true }
@@ -32,21 +36,18 @@ class AuthService {
       throw new Error('Invalid credentials');
     }
 
-    // Update last login
     user.lastLoginAt = new Date();
-    
-    // Generate tokens
+
     const accessToken = JWTConfig.generateAccessToken({
       userId: user.id,
       email: user.email,
       role: user.role
     });
-    
+
     const refreshToken = JWTConfig.generateRefreshToken({
       userId: user.id
     });
 
-    // Store refresh token
     user.refreshToken = refreshToken;
     await user.save();
 
@@ -56,12 +57,11 @@ class AuthService {
   static async register(registerData) {
     const registerDTO = new RegisterRequestDTO(registerData);
     const validation = registerDTO.validate();
-    
+
     if (!validation.isValid) {
       throw new Error(validation.errors.join(', '));
     }
 
-    // Check if user already exists
     const existingUser = await User.findOne({
       where: { email: registerDTO.email }
     });
@@ -70,42 +70,37 @@ class AuthService {
       throw new Error('User already exists with this email');
     }
 
-    // Create user
     const user = await User.create({
       email: registerDTO.email,
       password: registerDTO.password,
       firstName: registerDTO.firstName,
       lastName: registerDTO.lastName
     });
-  
-    // Generate tokens
+
     const accessToken = JWTConfig.generateAccessToken({
       userId: user.id,
       email: user.email,
       role: user.role
     });
-    
+
     const refreshToken = JWTConfig.generateRefreshToken({
       userId: user.id
     });
 
-    // Store refresh token
     user.refreshToken = refreshToken;
     await user.save();
 
     return new AuthResponseDTO(user, accessToken, refreshToken);
   }
 
-  // REGISTER NEW 
   static async registerNew(registerData) {
     const registerDTO = new RegistrationDto(registerData);
     const validation = registerDTO.validate();
-    
+
     if (!validation.isValid) {
       throw new Error(validation.errors.join(', '));
     }
 
-    // Check if user already exists
     const existingUser = await User.findOne({
       where: { email: registerDTO.email }
     });
@@ -114,7 +109,6 @@ class AuthService {
       throw new Error('User already exists with this email');
     }
 
-    // Create user
     const user = await User.create({
       email: registerDTO.email,
       password: registerDTO.password,
@@ -136,21 +130,18 @@ class AuthService {
       status: registerDTO.status
     });
 
-    // Generate tokens
     const accessToken = JWTConfig.generateAccessToken({
       userId: user.id,
       email: user.email,
       role: user.role
     });
-    
+
     const refreshToken = JWTConfig.generateRefreshToken({
       userId: user.id
     });
 
-    // Store refresh token
     user.refreshToken = refreshToken;
     await user.save();
-
     await registration.reload();
 
     return new AuthResponseDTO(user, accessToken, refreshToken);
@@ -162,9 +153,9 @@ class AuthService {
     }
 
     const decoded = JWTConfig.verifyRefreshToken(token);
-    
+
     const user = await User.findOne({
-      where: { 
+      where: {
         id: decoded.userId,
         refreshToken: token,
         isActive: true
@@ -175,24 +166,22 @@ class AuthService {
       throw new Error('Invalid refresh token');
     }
 
-    // Generate new tokens
     const accessToken = JWTConfig.generateAccessToken({
       userId: user.id,
       email: user.email,
       role: user.role
     });
-    
+
     const newRefreshToken = JWTConfig.generateRefreshToken({
       userId: user.id
     });
 
-    // Update refresh token
     user.refreshToken = newRefreshToken;
     await user.save();
 
     return new AuthResponseDTO(user, accessToken, newRefreshToken);
   }
-    
+
   static async logout(userId) {
     await User.update(
       { refreshToken: null },
@@ -200,86 +189,98 @@ class AuthService {
     );
   }
 
-  // =============driver_tbl new registration========================
- static async registerDriver(registerData) {
+  static async registerDriver(registerData) {
+    console.log('Registering new driver with data:', registerData);
     const registerDTO = new DriverRequestDTO(registerData);
-    // const validation = registerDTO.validate();
+   
+    const validation = registerDTO.validate();
+     
+    if (!validation.isValid) {
+      throw new Error(validation.errors.join(', '));
+    }
+    
 
-    // if (!validation.isValid) {
-    //   throw new Error(validation.errors.join(', '));
-    // }
-    // // Check if user already exists
-    // const existingUser = await User.findOne({
-    //   where: { email: registerDTO.email }
-    // });
 
-    // if (existingUser) {
-    //   throw new Error('User already exists with this email');
-    // }
+    const existingDriver = await Driver.findOne({
+      where: { license_no: registerDTO.license_no }
+    });
 
-    // Additional logic for driver registration can be implemented here
-    return registerDTO;
+    if (existingDriver) {
+      throw new Error('Driver already exists with this license number');
+    }
+
+
+    const newDriver = await Driver.create({
+      license_no: registerDTO.license_no,
+      d_name: registerDTO.d_name,
+      v_owner_name: registerDTO.v_owner_name,
+      v_org_name: registerDTO.v_org_name,
+      v_org_id: registerDTO.v_org_id,
+      d_status: registerDTO.d_status,
+      reg_id: registerDTO.reg_id
+    });
+
+    await DriverStatus.create({
+      d_id: newDriver.d_id,
+      reg_id: registerDTO.reg_id,
+      Status: registerDTO.status,
+      phone_no: registerDTO.Phone_no
+    });
+
+    return {
+      message: 'Driver registered successfully',
+      driver: newDriver
+    };
   }
+
   static async registerVehicle(registerData) {
- 
-  const vehicleDTO = new VehicleDto(registerData);
-  const validation = vehicleDTO.validate();
+    const vehicleDTO = new VehicleDto(registerData);
+    const validation = vehicleDTO.validate();
 
-  if (!validation.isValid) {
-    throw new Error(validation.errors.join(', '));
+    if (!validation.isValid) {
+      throw new Error(validation.errors.join(', '));
+    }
+
+    return vehicleDTO;
   }
+//======================driver status==================================
+  static async driverstatus(registerData, user) {
+    const registerDTO = new DriverStatusRequestDTO(registerData);
+    const validation = registerDTO.validate();
 
-  // You can now save the vehicle info into DB here
-  return vehicleDTO;
-}
-static async driverstatus(registerData, user) {
-  const registerDTO = new DriverStatusRequestDTO(registerData);
-  const validation = registerDTO.validate();
+    if (!validation.isValid) {
+      throw new Error(validation.errors.join(', '));
+    }
 
-  if (!validation.isValid) {
-    throw new Error(validation.errors.join(', '));
+    const { reg_id, d_id, Phone_no, Status } = registerDTO;
+
+    const errors = [];
+
+    if (!reg_id) errors.push('Registration ID (reg_id) is required');
+    if (!d_id) errors.push('Driver ID (d_id) is required');
+    if (!Phone_no || !/^[6-9]\d{9}$/.test(Phone_no)) {
+      errors.push('Valid Phone number is required');
+    }
+
+    const allowedStatuses = ['Active', 'Inactive'];
+    if (!allowedStatuses.includes(Status)) {
+      errors.push(`Status must be one of: ${allowedStatuses.join(', ')}`);
+    }
+
+    if (errors.length > 0) {
+      throw new Error(errors.join(', '));
+    }
+
+    const createdStatus = await DriverStatus.create({
+      reg_id,
+      d_id,
+      Phone_no,
+      Status
+    });
+
+    console.log('Driver status registered by user:', user?.id);
+    return createdStatus;
   }
-
-  // Extract fields
-  const { reg_id, d_id, Phone_no, Status } = registerDTO;
-
-  const errors = [];
-
-  // Field validation
-  if (!reg_id) errors.push('Registration ID (reg_id) is required');
-  if (!d_id) errors.push('Driver ID (d_id) is required');
-  if (!Phone_no || !/^[6-9]\d{9}$/.test(Phone_no)) {
-    errors.push('Valid Phone number is required');
-  }
-
-  const allowedStatuses = ['Active', 'Inactive'];
-  if (!allowedStatuses.includes(Status)) {
-    errors.push(`Status must be one of: ${allowedStatuses.join(', ')}`);
-  }
-
-  if (errors.length > 0) {
-    throw new Error(errors.join(', '));
-  }
-
-  // Create entry in driver_status_tbl
-  const DriverStatus = db.DriverStatus; // Assuming model is named like this
-
-  const createdStatus = await DriverStatus.create({
-    reg_id,
-    d_id,
-    Phone_no,
-    Status
-  });
-
-  // Optional: associate with user
-  console.log('Driver status registered by user:', user?.id);
-
-  // Return DTO or raw object
-  return createdStatus; // Or wrap with response DTO if needed
-}
-
-//===========================vehicle status registration=============
-
 
   static async vehiclestatus(data) {
     const dto = new VehicleStatusRequestDTO(data);
@@ -292,8 +293,6 @@ static async driverstatus(registerData, user) {
     const { v_id, reg_id, start_date, end_date, status } = dto;
 
     try {
-      const VehicleStatus = db.VehicleStatus;
-
       const createdStatus = await VehicleStatus.create({
         v_id,
         reg_id,
@@ -311,7 +310,6 @@ static async driverstatus(registerData, user) {
 
   static async getAllStatuses() {
     try {
-      const VehicleStatus = db.VehicleStatus;
       const allStatuses = await VehicleStatus.findAll();
       return allStatuses.map((status) => new VehicleStatusResponseDTO(status));
     } catch (err) {
@@ -320,54 +318,62 @@ static async driverstatus(registerData, user) {
     }
   }
 
-static async getByMobilenumber(mobileNumber) {
-  console.log("Fetching driver by mobile number:", mobileNumber);
-  if (!mobileNumber) {
-    throw new Error("Mobile number is required");
+  static async getByMobilenumber(mobileNumber) {
+    console.log("Fetching driver by mobile number:", mobileNumber);
+
+    if (!mobileNumber) {
+      throw new Error("Mobile number is required");
+    }
+
+    const driver = await DriverStatus.findOne({
+      where: { phone_no: mobileNumber },
+      include: [
+        {
+          model: Driver,
+          as: 'driver',
+          required: false
+        }
+      ]
+    });
+
+    if (!driver) {
+      throw new Error("No driver found with this mobile number");
+    }
+
+    return driver;
   }
-
-  const driver = await Driver.findOne({
-    include: [
-      {
-        model: DriverStatus,
-        where: { Phone_no: mobileNumber },
-        required: true
-      }
-    ]
-  });
-
-  if (!driver) {
-    throw new Error("No driver found with this mobile number");
+  //==================================tripname================================
+ static async tripname({ from, to }) {
+  try {
+    const newRoute = await Route.create({ from, to }); // trip_id is auto-generated here
+    return RouteResponseDTO.format(newRoute); // optional DTO formatting
+  } catch (error) {
+    console.error("Error creating route:", error);
+    throw new Error('Error creating new trip: ' + error.message);
   }
-
-  return driver;
-}
-  
-
-
-
- static async getByLicense(license) {
-  if (!license) {
-    throw new Error("License number is required");
-  }
-
-  const driver = await Driver.findOne({
-    where: { license_no: license },
-    include: [
-      {
-        model: DriverStatus,
-        required: false
-      }
-    ]
-  });
-
-  if (!driver) {
-    throw new Error("No driver found with this license number");
-  }
-
-  return driver;
 }
 
+
+
+//================================getByregId===========================
+  static async getByregId(regId) {
+    try {
+      const vehicles = await Vehicle.findAll({
+        include: [
+          {
+            model: VehicleStatus,
+            as: 'vehicleStatuses',
+            where: { reg_id: regId }
+          }
+        ]
+      });
+
+      return vehicles;
+    } catch (error) {
+      console.error("Service Error - getByregId:", error);
+      throw error;
+    }
+  }
 }
 
 module.exports = AuthService;

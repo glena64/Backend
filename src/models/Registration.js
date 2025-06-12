@@ -3,6 +3,7 @@ module.exports = (sequelize, DataTypes) => {
     reg_id: {
       type: DataTypes.STRING(20),
       primaryKey: true
+
     },
     user_id: {
       type: DataTypes.UUID,
@@ -58,6 +59,13 @@ module.exports = (sequelize, DataTypes) => {
       as: 'user'
     });
   };
+
+  Registration.associate = (models) => {
+  Registration.hasMany(models.VehicleStatus, {
+    foreignKey: 'reg_id',
+    as: 'vehicleStatuses'
+  });
+};
 
   // ✅ Method to return safe object
   Registration.prototype.toSafeObject = function () {

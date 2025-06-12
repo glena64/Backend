@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false
       },
-      Phone_no: {
+      phone_no: {
         type: DataTypes.STRING(10),
         allowNull: false,
         validate: {
@@ -36,6 +36,13 @@ module.exports = (sequelize, DataTypes) => {
   DriverStatus.prototype.toSafeObject = function () {
     const { ...safeData } = this.toJSON();
     return safeData;
+  };
+
+  DriverStatus.associate = models => {
+    DriverStatus.belongsTo(models.Driver, {
+      foreignKey: 'd_id',
+      as: 'driver'
+    });
   };
 
   return DriverStatus;

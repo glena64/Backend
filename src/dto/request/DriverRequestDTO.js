@@ -12,7 +12,8 @@ class DriverRequestDTO {
 
     // ✅ driver_status_tbl link fields
     this.status = data.status ?? this.d_status;   // fall back to d_status
-    this.reg_id = data.reg_id;                    // FK to registration_tbl
+    this.reg_id = data.reg_id;
+    this.Phone_no = data.Phone_no;                    // FK to registration_tbl
   }
 
   /**
@@ -31,7 +32,7 @@ class DriverRequestDTO {
     const d_status     = this.d_status?.trim();
 
     /* ---------- Required-field checks ---------- */
-    if (!d_id)         errors.push('Driver ID (d_id) is required');
+    // if (!d_id)         errors.push('Driver ID (d_id) is required');
     if (!license_no)   errors.push('License number is required');
     if (!d_name)       errors.push('Driver name is required');
     if (!v_owner_name) errors.push('Vehicle owner name is required');
@@ -40,12 +41,12 @@ class DriverRequestDTO {
     /* ---------- Format validations ---------- */
     // • Indian driving-licence number pattern (simple heuristic)
     //   e.g. "MH1420230123456"  (state + RTO + year + number)
-    if (
-      license_no &&
-      !/^[A-Z]{2}\d{2}(19|20)\d{2}\d{7}$/.test(license_no)
-    ) {
-      errors.push('Invalid licence number format');
-    }
+    // if (
+    //   license_no &&
+    //   !/^[A-Z]{2}\d{2}(19|20)\d{2}\d{7}$/.test(license_no)
+    // ) {
+    //   errors.push('Invalid licence number format');
+    // }
 
     // • Alphabetic (plus spaces) for names
     const namePattern = /^[A-Za-z\s.'-]+$/;

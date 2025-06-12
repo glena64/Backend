@@ -53,33 +53,33 @@ class AuthController {
 
   //===================getbyLicense========================
 static async getByLicense(req, res) {
-  try {
-    const { license } = req.query;
-
-    if (!license) {
-      return res.status(400).json(BaseResponseDTO.error("License number is required"));
+ let license = req.body.License;
+  console.log('getByLicense called with license:', license);
+  
+      if (!license) {
+        return res.status(400).json(BaseResponseDTO.error("License number is required"));
+      }
+  
+      try {
+        const result = await AuthService.getByLicense(license);
+  
+        if (!result) {
+          return res.status(404).json(BaseResponseDTO.error("User not found"));
+        }
+  
+        return res.json(BaseResponseDTO.success(result, 'User fetched successfully'));
+      } catch (error) {
+        console.error("Error fetching user by license:", error);
+        res.status(500).json(BaseResponseDTO.error("Server error: " + error.message));
+      }
     }
 
-    console.log('Fetching user by license:', license);
-
-    const result = await AuthService.getByLicense(license);
-
-    if (!result) {
-      return res.status(404).json(BaseResponseDTO.error("User not found"));
-    }
-
-    res.json(BaseResponseDTO.success(result, 'User fetched successfully'));
-  } catch (error) {
-    console.error("Error fetching user by license:", error);
-    res.status(500).json(BaseResponseDTO.error("Server error: " + error.message));
-  }
-}
 
   //=======================getByMobilenumber==============================
 static async getByMobilenumber(req, res) {
   try {
     let mobile  = req.body.Mobilenumber;
-   console.log('11111111111111111111111111111111111111111111111111111getByMobilenumber called with mobile:', mobile);
+   console.log('getByMobilenumber called with mobile:', mobile);
    
     if (!mobile) {
       return res.status(400).json(BaseResponseDTO.error("Mobile number is required"));
@@ -93,18 +93,56 @@ static async getByMobilenumber(req, res) {
       return res.status(404).json(BaseResponseDTO.error("User not found"));
     }
 
-    res.json(BaseResponseDTO.success(result, 'User fetched successfully'));
+    return res.json(BaseResponseDTO.success(result, 'User fetched successfully'));
   } catch (error) {
     console.error("Error fetching user by mobile number:", error);
     res.status(500).json(BaseResponseDTO.error("Server error: " + error.message));
   }
 }
-//=============================================================================
+//==================================getByregId===========================================
+static async getByregId(req, res) {
+  try {
+    let regId = req.body.regId;
+    console.log('getByregId called with regId:', regId);
+    
+    if (!regId) {
+      return res.status(400).json(BaseResponseDTO.error("Registration ID is required"));
+    }
+
+    const result = await AuthService.getByregId(regId);
+
+    if (!result) {
+      return res.status(404).json(BaseResponseDTO.error("User not found"));
+    }
+
+    return res.json(BaseResponseDTO.success(result, 'User fetched successfully'));
+  } catch (error) {
+    console.error("Error fetching user by registration ID:", error);
+    res.status(500).json(BaseResponseDTO.error("Server error: " + error.message));
+  }
+}
+//===========================tripname=======================================
+static async tripname(req, res) {
+  try {
+    const { from, to } = req.body;
+
+    const result = await AuthService.tripname ({ from, to });
+
+    return res.status(201).json(BaseResponseDTO.success(result, 'Trip created successfully'));
+  } catch (error) {
+    console.error("Error creating trip:", error);
+    res.status(500).json(BaseResponseDTO.error("Server error: " + error.message));
+  }
+}
+//=========================================================================================
+
+
 
   //driver_tbl registration
   static async registerDriver(req,res){
     try{
-      console.log('Registering new driver with data:', req.body);
+      // console.log('Registering new driver with data:', req.body);
+      // res.status(400).json(BaseResponseDTO.error(error.message));
       const result = await AuthService.registerDriver(req.body);
       res.status(201).json(BaseResponseDTO.success(result, 'Driver registration successful'));
     }catch (error){

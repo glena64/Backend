@@ -25,10 +25,12 @@ router.post('/driverstatus',authenticateToken,AuthController.driverstatus);
 router.post('/vehiclestatus',AuthController.vehiclestatus);
 router.get('/getlicense', AuthController.getByLicense);
 router.get('/getdriver', AuthController.getByMobilenumber); 
-
+router.get('/getvehicle', AuthController.getByregId);
+router.post('/trip', AuthController.tripname);
 // Apply password reset limiter (if you implement password reset)
 // router.post('/forgot-password', passwordResetLimiter, AuthController.forgotPassword);
 // router.post('/reset-password', passwordResetLimiter, AuthController.resetPassword);
+
 
 // No special rate limiting for authenticated routes (uses general limiter)
 router.post('/logout', authenticateToken, AuthController.logout);
